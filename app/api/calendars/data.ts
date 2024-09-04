@@ -70,3 +70,5 @@ export const calendarEvents = [
     },
   },
 ];
+
+export type CalendarEvent = (typeof  calendarEvents)[number]

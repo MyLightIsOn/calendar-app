@@ -5,8 +5,13 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import {CalendarEvent} from '@/app/api/calendars/data';
 
-const CalendarView = ({ events }) => {
+interface CalendarViewProps {
+  events: CalendarEvent[]
+}
+
+const CalendarView = ({ events }: CalendarViewProps) => {
   const [date, setDate] = useState<Date>(new Date());
 
   console.log(events);
