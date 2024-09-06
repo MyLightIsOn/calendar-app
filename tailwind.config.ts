@@ -1,13 +1,13 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -24,6 +24,19 @@ const config = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        default: {
+          50: "hsl(var(--default-50) / <alpha-value>)",
+          100: "hsl(var(--default-100) / <alpha-value>)",
+          200: "hsl(var(--default-200) / <alpha-value>)",
+          300: "hsl(var(--default-300) / <alpha-value>)",
+          400: "hsl(var(--default-400) / <alpha-value>)",
+          500: "hsl(var(--default-500) / <alpha-value>)",
+          600: "hsl(var(--default-600) / <alpha-value>)",
+          700: "hsl(var(--default-700) / <alpha-value>)",
+          800: "hsl(var(--default-800) / <alpha-value>)",
+          900: "hsl(var(--default-900) / <alpha-value>)",
+          950: "hsl(var(--default-950) / <alpha-value>)",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -35,6 +48,21 @@ const config = {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info) / <alpha-value>)",
+          700: "#0f766e",
+          foreground: "hsl(var(--info-foreground) / <alpha-value>)",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success) / <alpha-value>)",
+          700: "#15803d",
+          foreground: "hsl(var(--success-foreground) / <alpha-value>)",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning) / <alpha-value>)",
+          700: "#a16207",
+          foreground: "hsl(var(--warning-foreground) / <alpha-value>)",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -75,6 +103,6 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+} satisfies Config;
 
-export default config
+export default config;
