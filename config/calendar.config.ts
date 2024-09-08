@@ -13,6 +13,6 @@ export const getCategories = async () => {
     const response = await api.get("/calendars/categories");
     return response.data;
   } catch (error: any) {
-    return error.response.data;
+    return error.response?.data;
   }
 };
