@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import FullCalendar from "@fullcalendar/react"; // must go before plugins
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar/calendar";
 import { CalendarEvent, draggableEventTypes } from "@/app/api/calendars/data";
 import { DraggableEvents } from "@/components/ui/calendar/dragging-events";
-import FullCalendar from "@fullcalendar/react"; // must go before plugins
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
@@ -27,6 +27,39 @@ const CalendarView = ({ events }: CalendarViewProps) => {
   function handleEventClick() {}
 
   function handleDateClick() {}
+
+  useEffect(() => {
+    const draggableEl = document.getElementById("external-events");
+
+    const initDraggable = () => {
+      if (draggableEl) {
+        new Draggable(draggableEl, {
+          itemSelector: ".fc-event",
+          eventData: function (eventEl) {
+            let title = eventEl.getAttribute("title");
+            let id = eventEl.getAttribute("data");
+            let event = draggableEvents.find((e) => e.id === id);
+            let tag = event ? event.tag : "";
+            return {
+              title: title,
+              id: id,
+              extendedProps: {
+                calendar: tag,
+              },
+            };
+          },
+        });
+      }
+    };
+
+    if (draggableEvents.length > 0) {
+      initDraggable();
+    }
+
+    return () => {
+      draggableEl?.removeEventListener("mousedown", initDraggable);
+    };
+  }, [draggableEvents]);
 
   return (
     <div className="grid grid-cols-12 gap-6 divide-x divide-border min-h-screen p-6 bg-accent">
@@ -80,6 +113,8 @@ const CalendarView = ({ events }: CalendarViewProps) => {
             droppable={true}
             dayMaxEvents={2}
             weekends={true}
+            // TODO Fix type error for eventClassName
+            // @ts-ignore
             eventClassNames={handleClassName}
             dateClick={handleDateClick}
             eventClick={handleEventClick}
