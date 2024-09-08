@@ -70,5 +70,11 @@ export const calendarEvents = [
     },
   },
 ];
+export const draggableEventTypes = [
+  { title: "New Event Planning", id: "101", tag: "business" },
+  { title: "Meeting", id: "102", tag: "meeting" },
+  { title: "Generating Reports", id: "103", tag: "holiday" },
+  { title: "Create New theme", id: "104", tag: "etc" },
+];
 
-export type CalendarEvent = (typeof  calendarEvents)[number]
+export type CalendarEvent = (typeof calendarEvents)[number];
