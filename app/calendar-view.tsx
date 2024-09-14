@@ -3,16 +3,24 @@
 import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react"; // must go before plugins
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import EventSheet from "@/components/ui/calendar/event-sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar/calendar";
+import { Index } from "@/components/ui/calendar";
 import {
   CalendarCategory,
   CalendarEvent,
   draggableEventTypes,
 } from "@/app/api/calendars/data";
+import {
+  EventApi,
+  DateSelectArg,
+  EventClickArg,
+  EventContentArg,
+  formatDate,
+} from "@fullcalendar/core";
 import { DraggableEvents } from "@/components/ui/calendar/dragging-events";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -25,18 +33,57 @@ interface CalendarViewProps {
   categories: CalendarCategory[];
 }
 
+const wait = () => new Promise((resolve) => setTimeout(resolve, 1000));
+
 const CalendarView = ({ events, categories }: CalendarViewProps) => {
   const [date, setDate] = useState<Date>(new Date());
   const [selectedCategory, setSelectedCategory] = useState<string[] | null>(
     null,
   );
   const [draggableEvents] = useState(draggableEventTypes);
+  const [selectedEventDate, setSelectedEventDate] = useState<Date | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null,
+  );
+  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
-  function handleClassName() {}
+  const handleClassName = (arg: EventContentArg) => {
+    if (arg.event.extendedProps.calendar === "holiday") {
+      return "destructive";
+    } else if (arg.event.extendedProps.calendar === "business") {
+      return "primary";
+    } else if (arg.event.extendedProps.calendar === "personal") {
+      return "success";
+    } else if (arg.event.extendedProps.calendar === "family") {
+      return "info";
+    } else if (arg.event.extendedProps.calendar === "etc") {
+      return "info";
+    } else if (arg.event.extendedProps.calendar === "meeting") {
+      return "warning";
+    } else {
+      return "primary";
+    }
+  };
 
-  function handleEventClick() {}
+  const handleEventClick = (arg: any) => {
+    setSelectedEventDate(null);
+    setSheetOpen(true);
+    setSelectedEvent(arg);
+    wait().then(() => (document.body.style.pointerEvents = "auto"));
+  };
 
-  function handleDateClick() {}
+  const handleCloseModal = () => {
+    setSheetOpen(false);
+    setSelectedEvent(null);
+    setSelectedEventDate(null);
+  };
+
+  const handleDateClick = (arg: any) => {
+    setSheetOpen(true);
+    setSelectedEventDate(arg);
+    setSelectedEvent(null);
+    wait().then(() => (document.body.style.pointerEvents = "auto"));
+  };
 
   const handleCategorySelection = (category: string) => {
     if (selectedCategory && selectedCategory.includes(category)) {
@@ -88,97 +135,106 @@ const CalendarView = ({ events, categories }: CalendarViewProps) => {
   );
 
   return (
-    <div className="grid grid-cols-12 gap-6 divide-x divide-border min-h-screen p-6 bg-accent">
-      <Card className="col-span-12 lg:col-span-4 2xl:col-span-3 pb-5 h-fit">
-        <CardContent className="p-0 ">
-          <CardHeader className="border-none mb-2 pt-5">
-            <Button>
-              <Plus className="w-4 h-4 text-primary-foreground ltr:mr-1 rtl:ml-1" />
-              Add Event
-            </Button>
-          </CardHeader>
-          <div className="px-3">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(s) => {
-                console.log(s);
-              }}
-              className="rounded-md border w-full p-0 border-none"
-            />
-          </div>
-          <div id="external-events" className=" space-y-1.5 mt-6 px-4">
-            <p className=" text-sm font-medium text-default-700 pb-2">
-              Drag and drop your event or click in the calendar
-            </p>
-            {draggableEvents.map((event) => (
-              <DraggableEvents key={event.id} event={event} />
-            ))}
-          </div>
-          <div className="py-4 text-default-800  font-semibold text-xs uppercase mt-4 px-4">
-            FILTER
-          </div>
-          <ul className=" space-y-2 px-4">
-            <li className=" flex gap-3">
-              <Checkbox
-                checked={selectedCategory?.length === categories?.length}
-                onClick={() => {
-                  if (selectedCategory?.length === categories?.length) {
-                    setSelectedCategory([]);
-                  } else {
-                    setSelectedCategory(categories.map((c) => c.value));
-                  }
+    <>
+      <div className="grid grid-cols-12 gap-6 divide-x divide-border min-h-screen p-6 bg-accent">
+        <Card className="col-span-12 lg:col-span-4 2xl:col-span-3 pb-5 h-fit">
+          <CardContent className="p-0 ">
+            <CardHeader className="border-none mb-2 pt-5">
+              <Button onClick={handleDateClick}>
+                <Plus className="w-4 h-4 text-primary-foreground ltr:mr-1 rtl:ml-1" />
+                Add Event
+              </Button>
+            </CardHeader>
+            <div className="px-3">
+              <Index
+                mode="single"
+                selected={date}
+                onSelect={(s) => {
+                  handleDateClick(s);
                 }}
+                className="rounded-md border w-full p-0 border-none"
               />
-              <Label>All</Label>
-            </li>
-            {categories?.map((category) => (
-              <li className=" flex gap-3 " key={category.value}>
+            </div>
+            <div id="external-events" className=" space-y-1.5 mt-6 px-4">
+              <p className=" text-sm font-medium text-default-700 pb-2">
+                Drag and drop your event or click in the calendar
+              </p>
+              {draggableEvents.map((event) => (
+                <DraggableEvents key={event.id} event={event} />
+              ))}
+            </div>
+            <div className="py-4 text-default-800  font-semibold text-xs uppercase mt-4 px-4">
+              FILTER
+            </div>
+            <ul className=" space-y-2 px-4">
+              <li className=" flex gap-3">
                 <Checkbox
-                  className={category.className}
-                  id={category.label}
-                  checked={selectedCategory?.includes(category.value)}
-                  onClick={() => handleCategorySelection(category.value)}
+                  checked={selectedCategory?.length === categories?.length}
+                  onClick={() => {
+                    if (selectedCategory?.length === categories?.length) {
+                      setSelectedCategory([]);
+                    } else {
+                      setSelectedCategory(categories.map((c) => c.value));
+                    }
+                  }}
                 />
-                <Label htmlFor={category.label}>{category.label}</Label>
+                <Label>All</Label>
               </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-      <Card className="col-span-12 lg:col-span-8 2xl:col-span-9 pt-5 h-fit">
-        <CardContent className={"calendar"}>
-          <FullCalendar
-            plugins={[
-              dayGridPlugin,
-              timeGridPlugin,
-              interactionPlugin,
-              listPlugin,
-            ]}
-            headerToolbar={{
-              left: "prev,next today",
-              center: "title",
-              right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
-            }}
-            events={filteredEvents}
-            editable={true}
-            rerenderDelay={10}
-            eventDurationEditable={false}
-            selectable={true}
-            selectMirror={true}
-            droppable={true}
-            dayMaxEvents={2}
-            weekends={true}
-            // TODO Fix type error for eventClassName
-            // @ts-ignore
-            eventClassNames={handleClassName}
-            dateClick={handleDateClick}
-            eventClick={handleEventClick}
-            initialView="dayGridMonth"
-          />
-        </CardContent>
-      </Card>
-    </div>
+              {categories?.map((category) => (
+                <li className=" flex gap-3 " key={category.value}>
+                  <Checkbox
+                    className={category.className}
+                    id={category.label}
+                    checked={selectedCategory?.includes(category.value)}
+                    onClick={() => handleCategorySelection(category.value)}
+                  />
+                  <Label htmlFor={category.label}>{category.label}</Label>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+        <Card className="col-span-12 lg:col-span-8 2xl:col-span-9 pt-5 h-fit">
+          <CardContent className={"calendar"}>
+            <FullCalendar
+              plugins={[
+                dayGridPlugin,
+                timeGridPlugin,
+                interactionPlugin,
+                listPlugin,
+              ]}
+              headerToolbar={{
+                left: "prev,next today",
+                center: "title",
+                right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+              }}
+              events={filteredEvents}
+              editable={true}
+              rerenderDelay={10}
+              eventDurationEditable={false}
+              selectable={true}
+              selectMirror={true}
+              droppable={true}
+              dayMaxEvents={2}
+              weekends={true}
+              // TODO Fix type error for eventClassName
+              // @ts-ignore
+              eventClassNames={handleClassName}
+              dateClick={handleDateClick}
+              eventClick={handleEventClick}
+              initialView="dayGridMonth"
+            />
+          </CardContent>
+        </Card>
+      </div>
+      <EventSheet
+        open={sheetOpen}
+        onClose={handleCloseModal}
+        categories={categories}
+        event={selectedEvent}
+        selectedDate={selectedEventDate}
+      />
+    </>
   );
 };
 
